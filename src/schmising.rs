@@ -42,8 +42,8 @@ impl<const W: usize, const H: usize> MagnetizedMaterial<W, H> {
         let mut up_count = 0;
         let mut down_count = 0;
         
-        for dr in -1isize..=1 {
-            for dc in -1isize..=1 {
+        for dr in -2isize..=2 {
+            for dc in -2isize..=2 {
                 if dr == 0 && dc == 0 {
                     continue;
                 }

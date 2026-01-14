@@ -27,8 +27,8 @@ async fn main() {
     loop {
         clear_background(BLACK);
 
-        // Handle panning with left mouse button drag
-        if is_mouse_button_down(MouseButton::Left) {
+        // Handle panning with left mouse button drag (but not when over UI)
+        if is_mouse_button_down(MouseButton::Left) && !root_ui().is_mouse_over(mouse_position().into()) {
             let current_mouse = mouse_position();
             if let Some(last_pos) = last_mouse_pos {
                 camera_x += current_mouse.0 - last_pos.0;
