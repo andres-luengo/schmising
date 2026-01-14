@@ -55,9 +55,13 @@ async fn main() {
             camera_y = mouse_pos.1 + (camera_y - mouse_pos.1) * zoom_factor;
         }
 
-        let steps_per_frame = log_steps_per_frame.exp() as usize;
-        for _ in 0..steps_per_frame {
+        let max_steps_per_frame = log_steps_per_frame.exp() as usize;
+        let sim_start = get_time();
+        let mut actual_steps = 0;
+        // Allow up to 10ms for simulation to maintain ~60fps
+        while actual_steps < max_steps_per_frame && (get_time() - sim_start) < 0.01 {
             mat.step();
+            actual_steps += 1;
         }
 
         for r in 0..H {
@@ -96,7 +100,7 @@ async fn main() {
                 ui.slider(hash!(), "Temp (log)", -5.0f32..3.0f32, &mut log_temperature);
                 mat.temperature = log_temperature.exp();
                 
-                ui.label(None, &format!("Steps/frame: {}", steps_per_frame));
+                ui.label(None, &format!("Steps/frame: {} (max {})", actual_steps, max_steps_per_frame));
                 ui.slider(hash!(), "Speed (log)", 2.0f32..14.0f32, &mut log_steps_per_frame);
             });
         
