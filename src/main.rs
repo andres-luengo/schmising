@@ -18,9 +18,26 @@ async fn main() {
     let mut zoom = 1.0f32;
     let mut camera_x = 0.0f32;
     let mut camera_y = 0.0f32;
+    let mut last_mouse_pos: Option<(f32, f32)> = None;
+    
+    // Log scale sliders (store log values)
+    let mut log_temperature = mat.temperature.ln();
+    let mut log_steps_per_frame = (10000.0f32).ln();
 
     loop {
         clear_background(BLACK);
+
+        // Handle panning with left mouse button drag
+        if is_mouse_button_down(MouseButton::Left) {
+            let current_mouse = mouse_position();
+            if let Some(last_pos) = last_mouse_pos {
+                camera_x += current_mouse.0 - last_pos.0;
+                camera_y += current_mouse.1 - last_pos.1;
+            }
+            last_mouse_pos = Some(current_mouse);
+        } else {
+            last_mouse_pos = None;
+        }
 
         // Handle zoom with mouse wheel
         let mouse_wheel = mouse_wheel().1;
@@ -38,7 +55,8 @@ async fn main() {
             camera_y = mouse_pos.1 + (camera_y - mouse_pos.1) * zoom_factor;
         }
 
-        for _ in 0..10000 {
+        let steps_per_frame = log_steps_per_frame.exp() as usize;
+        for _ in 0..steps_per_frame {
             mat.step();
         }
 
@@ -71,11 +89,15 @@ async fn main() {
         );
         
         // Temperature slider UI
-        widgets::Window::new(hash!(), vec2(10., 10.), vec2(300., 80.))
+        widgets::Window::new(hash!(), vec2(10., 10.), vec2(300., 120.))
             .label("Controls")
             .ui(&mut root_ui(), |ui| {
-                ui.label(None, &format!("Temperature: {:.2}", mat.temperature));
-                ui.slider(hash!(), "Temp", 0.01f32..10.0f32, &mut mat.temperature);
+                ui.label(None, &format!("Temperature: {:.4}", mat.temperature));
+                ui.slider(hash!(), "Temp (log)", -5.0f32..3.0f32, &mut log_temperature);
+                mat.temperature = log_temperature.exp();
+                
+                ui.label(None, &format!("Steps/frame: {}", steps_per_frame));
+                ui.slider(hash!(), "Speed (log)", 2.0f32..14.0f32, &mut log_steps_per_frame);
             });
         
         next_frame().await
