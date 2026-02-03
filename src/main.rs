@@ -15,9 +15,9 @@ async fn main() {
     let texture = Texture2D::from_image(&image);
 
     // Zoom and pan state
-    let mut zoom = 1.0f32;
-    let mut camera_x = 0.0f32;
-    let mut camera_y = 0.0f32;
+    let mut zoom: f32 = 1.0;
+    let mut camera_x: f32 = 0.0;
+    let mut camera_y: f32 = 0.0;
     let mut last_mouse_pos: Option<(f32, f32)> = None;
     
     // Log scale sliders (store log values)
